@@ -1,14 +1,9 @@
-// routes/health.js
-import express from "express";
-
+import express from 'express';
+import { success } from '../utils/response.js';
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({
-    status: "ok",
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
+router.get('/', (req, res) => {
+  success(res, 'Kaihi API running at full performance');
 });
 
 export default router;
