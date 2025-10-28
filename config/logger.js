@@ -1,27 +1,25 @@
 // config/logger.js
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const logDir = path.join(__dirname, "../logs");
-if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
+const logDir = "logs";
+
+const transport = new DailyRotateFile({
+  dirname: logDir,
+  filename: "%DATE%.log",
+  datePattern: "YYYY-MM-DD",
+  maxSize: "10m",
+  maxFiles: "14d",
+  zippedArchive: true,
+});
 
 export const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
-    winston.format.timestamp(),
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.printf(
-      ({ level, message, timestamp }) => `[${timestamp}] ${level}: ${message}`
+      (info) => `${info.timestamp} [${info.level.toUpperCase()}]: ${info.message}`
     )
   ),
-  transports: [
-    new winston.transports.File({ filename: path.join(logDir, "server.log") }),
-    new winston.transports.Console(),
-  ],
+  transports: [new winston.transports.Console(), transport],
 });
-
-logger.stream = {
-  write: (message) => logger.info(message.trim()),
-};
